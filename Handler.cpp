@@ -29,7 +29,7 @@ void Handler::methodGet()
 		
 	if (request.getUrl() == "")
 		request.setUrl(HOME_PAGE);
-	std::ifstream file(request.getUrl());
+	std::ifstream file(HOME_DIR + request.getUrl());
 	if (file.is_open())
 	{
 		std::cout << "File opened OK" << std::endl;
