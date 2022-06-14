@@ -18,7 +18,11 @@ Request::Request(Request const & other)
 
 Request Request::operator=(Request const & other)
 {
-	*this = other;
+	this->method = other.method;
+	this->url = other.url;
+	this->httpVersion = other.httpVersion;
+	this->headers = other.headers;
+	this->body = other.body;
 	return *this;
 }
 
@@ -53,7 +57,8 @@ void Request::parseRequest(std::string rawData)
 
 	start = end + 1;
 	end = line.find(' ', start);
-	this->url = line.substr(start + 1, end - start - 1);
+	std::string homeDir = HOME_DIR;
+	this->url = homeDir + line.substr(start + 1, end - start - 1);
 
 	start = end + 1;
 	end = line.length();

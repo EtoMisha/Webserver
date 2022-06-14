@@ -2,6 +2,8 @@
 #include <iostream>
 #include <map>
 
+#define HOME_DIR "files/"
+
 class Request
 {
 	public:

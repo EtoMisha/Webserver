@@ -22,27 +22,49 @@ Response Handler::getResponse() const
 	return this->response;
 }
 
+// void Handler::readFile(unsigned char* buffer, size_t size, const char* file_path)
+// {
+// 	FILE* fin = fopen(file_path, "rb");  // r for read, b for binary
+// 	if (fin == NULL) {
+// 		printf("open %s failed.", file_path);
+// 		return;
+// 	}
+
+// 	fread(buffer, sizeof(unsigned char), size, fin); // read sizeof(buffer) elements to our buffer
+// }
+
 void Handler::methodGet()
 {
-	std::stringstream resp;
-	std::stringstream resp_body;
+	// unsigned char *buffer;
+	
+	// std::stringstream resp;
+	// std::stringstream resp_body;
 		
-	if (request.getUrl() == "")
-		request.setUrl(HOME_PAGE);
-	std::ifstream file(HOME_DIR + request.getUrl());
-	if (file.is_open())
+	
+	if (request.getUrl() == HOME_DIR)
+		request.setUrl(request.getUrl() + HOME_PAGE);
+	const char *file_path = request.getUrl().c_str();
+	FILE* file = fopen(file_path, "rb");  // r for read, b for binary
+	if (file == NULL)
+	{
+		std::cout << "Can't open file" << request.getUrl() << std::endl;
+		response.setStatusCode(404);
+	}
+	else 
 	{
 		std::cout << "File opened OK" << std::endl;
+		response.setStatusCode(200);
 		
-		response.setStatusCode(200);		
-		resp_body << file.rdbuf();
-		response.setBody(resp_body.str());
-		file.close();
-	}
-	else
-	{
-		std::cout << "Can't open file" << "|" << request.getUrl() << "|" << std::endl;
-		response.setStatusCode(404);
+		fseek(file, 0L, SEEK_END);
+		int size = ftell(file);
+
+		response.setContentLength(size);
+					std::cout << "CONTENT LENGTH - " << response.getLength() << std::endl;
+					std::cout << "URL - " << request.getUrl() << std::endl;
+		response.setBody(request.getUrl());
+		// resp_body << file.rdbuf();
+		// response.setBody(resp_body.str());
+		fclose(file);
 	}
 	response.setHttpVersion(request.getHttp());
 	response.setHeaders("Version: HTTP/1.1\r\nContent-Type: text/html; charset=utf-8");

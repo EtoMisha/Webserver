@@ -14,6 +14,8 @@ class Response
 		Response operator=(Response const & other);
 
 		std::string getStatusText();
+		std::string getBodyFile();
+		int getLength();
 
 		void setStatusCode(int statusCode);
 		void setStatusText();
@@ -26,11 +28,13 @@ class Response
 		std::string toString();
 
 	private:
+		std::string rawData;
+		
 		std::string httpVersion;
 		int statusCode;
 		std::string statusText;
 		std::string headers;
-		std::string body;
+		std::string bodyFile;
 		int contentLength;
 	
 		std::map<int, std::string> codes;

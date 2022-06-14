@@ -14,10 +14,11 @@
 #include <fcntl.h>
 
 #include "Request.hpp"
+#include "Response.hpp"
 
 #define PORT 8000
 #define LOCALHOST "127.0.0.1"
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 2048
 #define NUSERS 10
 
 class Server
@@ -36,10 +37,11 @@ class Server
 
 		void listenLoop();
 		std::string readRequest(int fd);
-		void sendResponse(int client_socket, int i, std::string responseStr);
+		void sendResponse(int fd, int i, Response response);
 
-		int sendPage(int client_socket, std::string page);
+		// int sendPage(int client_socket, std::string page);
+		int sendFile(int fd, std::string file_path);
 
-		int err(std::string msg, int socket);
+		int err(std::string msg);
 
 };

@@ -8,6 +8,7 @@ Response::Response()
 
 Response::Response(std::string rawData)
 {
+	this->rawData = rawData;
 
 }
 
@@ -20,23 +21,38 @@ Response::Response(Response const & other)
 	this->statusCode = other.statusCode;
 	this->statusText = other.statusText;
 	this->headers = other.headers;
-	this->body = other.body;
+	this->bodyFile = other.bodyFile;
 }
 
 Response Response::operator=(Response const & other)
 {
-	*this = other;
+	this->httpVersion = other.httpVersion;
+	this->statusCode = other.statusCode;
+	this->statusText = other.statusText;
+	this->headers = other.headers;
+	this->bodyFile = other.bodyFile;
 	return *this;
 }
 
 void Response::setStatusCode(int statusCode)
 {
 	this->statusCode = statusCode;
+	this->statusText = codes[statusCode];
 }
 
 std::string Response::getStatusText()
 {
 	return codes[this->statusCode];
+}
+
+int Response::getLength()
+{
+	return this->contentLength;
+}
+
+std::string Response::getBodyFile()
+{
+	return this->bodyFile;
 }
 
 void Response::setHttpVersion(std::string version)
@@ -56,7 +72,7 @@ void Response::setHeaders(std::string headers)
 
 void Response::setBody(std::string body)
 {
-	this->body = body;
+	this->bodyFile = body;
 }
 
 std::string Response::toString()
@@ -66,9 +82,8 @@ std::string Response::toString()
 
 	resp << httpVersion << " " << statusCode << " " << this->getStatusText() << delimiter
 	<< headers << delimiter
-	<< "Content-Length: " << body.length()
-	<< delimiter << delimiter
-	<< body;
+	<< "Content-Length: " << contentLength
+	<< delimiter << delimiter;
 
 	return resp.str();
 

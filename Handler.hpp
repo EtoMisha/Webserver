@@ -22,4 +22,6 @@ class Handler
 		void methodGet();
 		void methodPost();
 		void methodDelete();
+
+		// void readFile(unsigned char* buffer, size_t size, const char* file_path);
 };
