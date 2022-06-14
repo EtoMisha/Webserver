@@ -40,7 +40,7 @@ class Server
 		void sendResponse(int fd, int i, Response response);
 
 		// int sendPage(int client_socket, std::string page);
-		int sendFile(int fd, std::string file_path);
+		int sendFile(int fd, std::string file_path, int size);
 
 		int err(std::string msg);
 

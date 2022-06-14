@@ -100,7 +100,7 @@ std::string Server::readRequest(int socket)
 	return requestData;
 }
 
-int Server::sendFile(int fd, std::string file_path)
+int Server::sendFile(int fd, std::string file_path, int size)
 {
 	FILE* fin = fopen(file_path.c_str(), "rb");  // r for read, b for binary
 	if (fin == NULL)
@@ -109,7 +109,7 @@ int Server::sendFile(int fd, std::string file_path)
 	int bufferSize = BUFFER_SIZE;
 	char *buffer = (char *) malloc(bufferSize);
 	int i = 0;
-	while (i < bufferSize)
+	while (i < size)
 	{
 		fread(buffer, sizeof(char), bufferSize, fin);
 		int l = send(fd, &buffer[i], bufferSize, 0);
@@ -154,7 +154,7 @@ void Server::sendResponse(int fd, int i, Response response)
 	int send_result = send(fd, response.toString().c_str(), response.toString().length(), 0);
 	if (send_result == -1)
 		err("send");
-	send_result = sendFile(fd, response.getBodyFile());
+	send_result = sendFile(fd, response.getBodyFile(), response.getLength());
 	if (send_result == -1)
 		err("send");
 	send_result = send(fd, delimeter.c_str(), delimeter.length(), 0);
