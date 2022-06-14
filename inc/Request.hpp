@@ -18,7 +18,7 @@ class Request
 		std::string const getUrl() const;
 		std::string const getHttp() const;
 
-		std::map<std::string, std::string> getBodyPOST();
+		std::map<std::string, std::string> &getBodyPOST();
 
 		void setUrl(std::string url);
 		
