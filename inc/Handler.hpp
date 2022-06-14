@@ -4,7 +4,7 @@
 #include "Response.hpp"
 
 #define HOME_PAGE "index.html"
-#define HOME_DIR "files/"
+// #define HOME_DIR "res/"
 
 class Handler
 {

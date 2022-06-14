@@ -1,9 +1,9 @@
-#include "Server.hpp"
-#include "Request.hpp"
-#include "Response.hpp"
-#include "Handler.hpp"
+#include "../inc/Server.hpp"
+#include "../inc/Request.hpp"
+#include "../inc/Response.hpp"
+#include "../inc/Handler.hpp"
 
-#define HOME_DIR "files/"
+#define HOME_DIR "res/"
 
 Server::Server() {}
 Server::~Server() {}

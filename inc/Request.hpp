@@ -2,7 +2,7 @@
 #include <iostream>
 #include <map>
 
-#define HOME_DIR "files/"
+#define HOME_DIR "res/"
 
 class Request
 {

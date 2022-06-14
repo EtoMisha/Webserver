@@ -1,33 +1,26 @@
-SRCS = main.cpp Server.cpp Handler.cpp Request.cpp Response.cpp
+NAME = Webserver
+
+SRC =	$(wildcard ./src/*.cpp)
+INC = $(wildcard ./inc/*.hpp)
+OBJ	= $(SRC:.cpp=.o)
 
 CC = c++
+FLAG = -Wall -Wextra -Werror -std=c++98
 
-FLAGS = -Wall -Wextra -Werror -std=c++98
+.PHONY: all bonus clean fclean re
 
-INCLUDES = Server.hpp Handler.hpp Request.hpp Response.hpp
+all: $(NAME)
 
-OBJS = $(SRCS:.cpp=.o) 
+$(NAME): $(OBJ) $(INC) Makefile
+	@$(CC) $(FLAG) $(OBJ) -o $(NAME)
 
-NAME = webserver
+%.o: ./src/%.cpp ./inc/%.hpp
+	@$(CC) $(FLAG) -c $< -o $@
 
-$(NAME): $(OBJS)
-	$(CC) $(OBJS) -o $(NAME)
+clean:
+	@rm -f $(OBJ)
 
-%.o : %.cpp $(INCLUDES) Makefile
-	$(CC) ${FLAGS} -o $@ -c $<
+fclean: clean
+	@rm -f $(NAME)
 
-all : $(NAME)
-
-clean :
-	rm -rf $(OBJS)
-
-fclean : clean
-	rm -rf $(NAME)
-
-re : fclean all
-
-x : $(NAME)
-	rm -rf $(OBJS)
-	./webserver
-
-.PHONY: all clean fclean re
+re: fclean all
