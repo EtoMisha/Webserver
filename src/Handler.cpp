@@ -1,4 +1,5 @@
 #include "../inc/Handler.hpp"
+#include "../inc/Request.hpp"
 #include <sstream>
 #include <iostream>
 #include <fstream>
@@ -56,7 +57,7 @@ void Handler::methodGet()
 		response.setStatusCode(200);
 		
 		fseek(file, 0L, SEEK_END);
-		int size = ftell(file);
+		int size = ftell(file); // isn't alwasy accurate
 
 		response.setContentLength(size);
 					std::cout << "CONTENT LENGTH - " << response.getLength() << std::endl;
@@ -72,7 +73,18 @@ void Handler::methodGet()
 
 void Handler::methodPost()
 {
+	std::cout << "hello I'm POST meth" << std::endl;
+	std::map<std::string, std::string> postInfo = request.getBodyPOST();
+	std::ofstream file(request.getUrl() + ".txt");
 
+	std::map<std::string, std::string>::iterator it;
+	for (it = postInfo.begin(); it != postInfo.end(); it++)
+	{
+		file << it->first
+				<< ':'
+				<< it->second 
+				<< std::endl;
+	}
 }
 
 void Handler::methodDelete()

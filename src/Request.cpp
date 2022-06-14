@@ -43,10 +43,16 @@ std::string const Request::getHttp() const
 	return this->httpVersion;
 }
 
+std::map<std::string, std::string> Request::getBodyPOST()
+{
+	return this->bodyPOST;
+}
+
 void Request::setUrl(std::string url)
 {
 	this->url = url;
 }
+
 
 void Request::parseRequest(std::string rawData)
 {
@@ -78,6 +84,24 @@ void Request::parseRequest(std::string rawData)
 		start = end + 1;
 		end = rawData.find('\n', start);
 	}
-	
 	//  для метода POST надо еще спарсить body
+	if(this->method == "POST")
+	{
+		start++;
+		while (end < rawData.length() - 1 && line != "")
+		{
+			line = rawData.substr(start, end - start - 1);
+			std::cout << "parsing line " << line << std::endl; //ex: key=val&key1=val1&key2=val2\n
+
+			std::string subLine = line.substr(start, line.find('&', 0));
+			std::cout << "sub line " << subLine << std::endl; //ex: key=val
+			int delimiter = subLine.find('=', 0);
+			std::string key = subLine.substr(0, delimiter);
+			std::string value = subLine.substr(delimiter + 2, line.length());
+			this->bodyPOST[key] = value;
+			
+			start = line.find('&', 0) + 1;
+			end = rawData.find('\n', start);
+		}
+	}
 }

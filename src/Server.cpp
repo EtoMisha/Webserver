@@ -105,7 +105,6 @@ int Server::sendFile(int fd, std::string file_path)
 	FILE* fin = fopen(file_path.c_str(), "rb");  // r for read, b for binary
 	if (fin == NULL)
 		return -1;
-	
 	int bufferSize = BUFFER_SIZE;
 	char *buffer = (char *) malloc(bufferSize);
 	int i = 0;
