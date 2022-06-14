@@ -18,6 +18,8 @@ class Request
 		std::string const getUrl() const;
 		std::string const getHttp() const;
 
+		std::map<std::string, std::string> getBodyPOST();
+
 		void setUrl(std::string url);
 		
 	private:
@@ -25,6 +27,7 @@ class Request
 		std::string url;
 		std::string httpVersion;
 		std::map<std::string, std::string> headers;
+		std::map<std::string, std::string> bodyPOST; // post method
 		std::string body;
 		
 		

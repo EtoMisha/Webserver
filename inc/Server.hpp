@@ -18,7 +18,7 @@
 
 #define PORT 8000
 #define LOCALHOST "127.0.0.1"
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 1024
 #define NUSERS 10
 
 class Server
