@@ -66,7 +66,7 @@ void Server::listenLoop()
 			EV_SET(&evSet, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
 			if (kevent(kq, &evSet, 1, NULL, 0, NULL) == -1)
 				err("kevent");
-			printf("Connected\n");
+			printf("---\nConnected\n");
 			EV_SET(&evSet, client_fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, NULL);
 			if (kevent(kq, &evSet, 1, NULL, 0, NULL) == -1)
 				err("kevent");
@@ -102,48 +102,24 @@ std::string Server::readRequest(int socket)
 
 int Server::sendFile(int fd, std::string file_path, int size)
 {
-	FILE* fin = fopen(file_path.c_str(), "rb");  // r for read, b for binary
-	if (fin == NULL)
-		return -1;
-	
+	std::ifstream file(file_path.c_str());
+	if (!file)
+		return -1;	
 	int bufferSize = BUFFER_SIZE;
-	char *buffer = (char *) malloc(bufferSize);
+	char buffer[bufferSize];
 	int i = 0;
-	while (i < size)
+	while (!file.eof())	
 	{
-		fread(buffer, sizeof(char), bufferSize, fin);
-		int l = send(fd, &buffer[i], bufferSize, 0);
-		std::cout << "SENT " << l << " bytes" << std::endl; 
+		file.read(buffer, bufferSize);
+		int l = send(fd, buffer, std::min(size - i, bufferSize), 0);
 		if (l < 0)
 			return -1;
 		i += l;
 	}
-	fclose(fin);
-	std::cout << "FILE SENT, OK" << std::endl; 
+	file.close();
+	std::cout << "file sent ok: " << i << " bytes" << std::endl; 
 	return i;
 }
-
-// void Handler::readFile(unsigned char* buffer, size_t size, const char* file_path)
-// {
-// 	FILE* fin = fopen(file_path, "rb");  // r for read, b for binary
-// 	if (fin == NULL) {
-// 		printf("open %s failed.", file_path);
-// 		return;
-// 	}
-
-// 	fread(buffer, sizeof(unsigned char), size, fin); // read sizeof(buffer) elements to our buffer
-// }
-
-// int SendBuffer(SOCKET s, const char* buffer, int bufferSize, int chunkSize = 4 * 1024) {
-
-//     int i = 0;
-//     while (i < bufferSize) {
-//         const int l = send(s, &buffer[i], __min(chunkSize, bufferSize - i), 0);
-//         if (l < 0) { return l; } // this is an error
-//         i += l;
-//     }
-//     return i;
-// }
 
 void Server::sendResponse(int fd, int i, Response response)
 {
@@ -152,6 +128,7 @@ void Server::sendResponse(int fd, int i, Response response)
 	std::string delimeter = "\r\n\r\n";
 
 	int send_result = send(fd, response.toString().c_str(), response.toString().length(), 0);
+	std::cout << "---\n" << response.toString() << "\n---\n";
 	if (send_result == -1)
 		err("send");
 	send_result = sendFile(fd, response.getBodyFile(), response.getLength());

@@ -71,10 +71,14 @@ void Request::parseRequest(std::string rawData)
 	{
 		line = rawData.substr(start, end - start - 1);
 		int delimiter = line.find(':', 0);
-		std::string key = line.substr(0, delimiter);
-		std::string value = line.substr(delimiter + 2, line.length());
-		// std::cout << << key << " - " << value << std::endl;
-		this->headers[key] = value;
+
+		if (line.length() > 0)
+		{
+			std::string key = line.substr(0, delimiter);
+			std::string value = line.substr(delimiter + 2, line.length());
+			// std::cout << "- " << key << " - " << value << std::endl;
+			this->headers[key] = value;
+		}	
 		start = end + 1;
 		end = rawData.find('\n', start);
 	}

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <fcntl.h>
+
 Handler::Handler() {}
 
 Handler::Handler(Request req) : request(req) 
@@ -52,22 +54,20 @@ void Handler::methodGet()
 	}
 	else 
 	{
-		std::cout << "File opened OK" << std::endl;
+		std::cout << "File opened OK, URL: " << request.getUrl() << std::endl;
 		response.setStatusCode(200);
 		
 		fseek(file, 0L, SEEK_END);
 		int size = ftell(file);
 
 		response.setContentLength(size);
-					std::cout << "CONTENT LENGTH - " << response.getLength() << std::endl;
-					std::cout << "URL - " << request.getUrl() << std::endl;
 		response.setBody(request.getUrl());
 		// resp_body << file.rdbuf();
 		// response.setBody(resp_body.str());
 		fclose(file);
 	}
 	response.setHttpVersion(request.getHttp());
-	response.setHeaders("Version: HTTP/1.1\r\nContent-Type: text/html; charset=utf-8");
+	response.setHeaders("Version: HTTP/1.1");//\r\nContent-Type: text/html; charset=utf-8");
 }
 
 void Handler::methodPost()

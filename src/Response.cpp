@@ -22,6 +22,7 @@ Response::Response(Response const & other)
 	this->statusText = other.statusText;
 	this->headers = other.headers;
 	this->bodyFile = other.bodyFile;
+	this->contentLength = other.contentLength;
 }
 
 Response Response::operator=(Response const & other)
@@ -31,6 +32,7 @@ Response Response::operator=(Response const & other)
 	this->statusText = other.statusText;
 	this->headers = other.headers;
 	this->bodyFile = other.bodyFile;
+	this->contentLength = other.contentLength;
 	return *this;
 }
 
@@ -42,7 +44,7 @@ void Response::setStatusCode(int statusCode)
 
 std::string Response::getStatusText()
 {
-	return codes[this->statusCode];
+	return this->statusText;
 }
 
 int Response::getLength()
@@ -82,7 +84,7 @@ std::string Response::toString()
 
 	resp << httpVersion << " " << statusCode << " " << this->getStatusText() << delimiter
 	<< headers << delimiter
-	<< "Content-Length: " << contentLength
+	<< "Content-Length: " << this->getLength()
 	<< delimiter << delimiter;
 
 	return resp.str();
