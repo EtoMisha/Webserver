@@ -24,3 +24,7 @@ fclean: clean
 	@rm -f $(NAME)
 
 re: fclean all
+
+x: $(NAME)
+	@rm -f $(OBJ)
+	./$(NAME)

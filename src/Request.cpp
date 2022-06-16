@@ -2,9 +2,10 @@
 
 Request::Request() {}
 
-Request::Request(std::string rawData)
+Request::Request(std::string rawData) : rawData(rawData)
 {
-	parseRequest(rawData);
+	if (this->rawData != "")
+		parseRequest(this->rawData);
 }
 
 Request::Request(Request const & other)
@@ -47,7 +48,6 @@ std::string const Request::getHttp() const
 
 std::map<std::string, std::string> &Request::getBodyPOST()
 {
-	std::cout << "in getter " << bodyPOST.begin()->first << std::endl;
 	return this->bodyPOST;
 }
 
@@ -55,7 +55,6 @@ void Request::setUrl(std::string url)
 {
 	this->url = url;
 }
-
 
 void Request::parseRequest(std::string rawData)
 {
@@ -72,7 +71,7 @@ void Request::parseRequest(std::string rawData)
 	start = end + 1;
 	end = line.length();
 	this->httpVersion = rawData.substr(start, end - start - 1);
-	// std::cout << this->method << " - " << this->url << " - " << this->httpVersion << std::endl;
+	std::cout << this->method << " - " << this->url << " - " << this->httpVersion << std::endl;
 
 	start = end + 1;
 	end = rawData.find('\n', start);
@@ -94,7 +93,6 @@ void Request::parseRequest(std::string rawData)
 	if(this->method == "POST")
 	{
 		end = rawData.length();
-		// std::cout << "--- start: " << start << " end:" << end << std::endl;
 		line = rawData.substr(start, end - start);
 		start = 0;
 		std::string subLine;
@@ -121,4 +119,12 @@ void Request::parseRequest(std::string rawData)
 				line = "";
 		}
 	}
+}
+
+int Request::check()
+{
+	if (this->rawData == "")
+		return 0;
+	else
+		return 1;
 }

@@ -1,4 +1,4 @@
-#include "../inc/Server.hpp"
+#include "../inc/Webserver.hpp"
 #include "../inc/Request.hpp"
 #include "../inc/Response.hpp"
 #include "../inc/Handler.hpp"
@@ -74,9 +74,12 @@ void Server::listenLoop()
 		else if (evList[i].filter == EVFILT_READ || evList[i].filter == EVFILT_WRITE) 
 		{
 			Request request(readRequest(fd));
-			Handler handler(request);
-			Response response = handler.getResponse();
-			sendResponse(fd, i, response);
+			if (request.check())
+			{
+				Handler handler(request);
+				Response response = handler.getResponse();
+				sendResponse(fd, i, response);
+			}
 		}
 	}
 }
@@ -94,6 +97,10 @@ std::string Server::readRequest(int socket)
 	char buf[BUFFER_SIZE];
 	size_t bytes_read = recv(socket, buf, sizeof(buf), 0);
 	printf("read %zu bytes\n", bytes_read);
+	if (bytes_read == 0)
+	{
+		std::cout << "Can't receive client's request" << std::endl;
+	}
 	buf[bytes_read] = '\0';
 	std::string requestData = buf;
 	
@@ -128,12 +135,15 @@ void Server::sendResponse(int fd, int i, Response response)
 	std::string delimeter = "\r\n\r\n";
 
 	int send_result = send(fd, response.toString().c_str(), response.toString().length(), 0);
-	std::cout << "---\n" << response.toString() << "\n---\n";
+	// std::cout << "---\n" << response.toString() << "\n---\n";
 	if (send_result == -1)
 		err("send");
-	send_result = sendFile(fd, response.getBodyFile(), response.getLength());
-	if (send_result == -1)
-		err("send");
+	if (response.getBodyFile() != "")
+	{
+		send_result = sendFile(fd, response.getBodyFile(), response.getLength());
+		if (send_result == -1)
+			err("send");
+	}
 	send_result = send(fd, delimeter.c_str(), delimeter.length(), 0);
 	if (send_result == -1)
 		err("send");

@@ -21,8 +21,12 @@ class Request
 		std::map<std::string, std::string> &getBodyPOST();
 
 		void setUrl(std::string url);
+
+		int check();
 		
 	private:
+		std::string rawData;
+		
 		std::string method;
 		std::string url;
 		std::string httpVersion;

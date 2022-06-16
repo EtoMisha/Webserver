@@ -10,7 +10,7 @@ Handler::Handler() {}
 
 Handler::Handler(Request req) : request(req) 
 {
-	std::cout << "METHOD: " << request.getMethod() << std::endl;
+	// std::cout << "METHOD: " << request.getMethod() << std::endl;
 	
 	if (request.getMethod() == "GET")
 		methodGet();
@@ -34,14 +34,14 @@ void Handler::methodGet()
 
 void Handler::methodPost()
 {
-	std::cout << "hello I'm POST meth" << std::endl;
+	// std::cout << "hello I'm POST meth" << std::endl;
 	std::ofstream file(request.getUrl() + ".txt");
-	std::cout << request.getBodyPOST().begin()->first << std::endl;
+	// std::cout << request.getBodyPOST().begin()->first << std::endl;
 
 	std::map<std::string, std::string>::iterator it;
 	for (it = request.getBodyPOST().begin(); it != request.getBodyPOST().end(); it++)
 	{
-		std::cout << it->first << " - " << it->second << std::endl;
+		// std::cout << it->first << " - " << it->second << std::endl;
 		file << it->first
 				<< ':'
 				<< it->second 
@@ -63,8 +63,10 @@ void Handler::returnFile()
 	FILE* file = fopen(file_path, "rb");
 	if (file == NULL)
 	{
-		std::cout << "Can't open file" << request.getUrl() << std::endl;
+		std::cout << "Can't open file " << request.getUrl() << std::endl;
 		response.setStatusCode(404);
+		response.setContentLength(0);
+		response.setBody("");
 	}
 	else 
 	{
