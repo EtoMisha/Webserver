@@ -2,13 +2,15 @@
 #include <iostream>
 #include <map>
 
-#define HOME_DIR "res/"
+#include "Config.hpp"
+
+// #define HOME_DIR "res/"
 
 class Request
 {
 	public:
 		Request();
-		Request(std::string rawData);
+		Request(std::string rawData, Config config);
 		Request(Request const & other);
 		~Request();
 
@@ -26,6 +28,7 @@ class Request
 		
 	private:
 		std::string rawData;
+		Config config;
 		
 		std::string method;
 		std::string url;
@@ -33,7 +36,12 @@ class Request
 		std::map<std::string, std::string> headers;
 		std::map<std::string, std::string> bodyPOST; // post method
 		std::string body;
+		// std::string contentType;
+		std::string boundary;
+		// int contentLength;
 		
 		
 		void parseRequest(std::string rawData);
+		void parseUrlencoded(std::string rawData, int start);
+		void parseMultipart(std::string rawData, int start);
 };

@@ -3,100 +3,137 @@
 #include "../inc/Response.hpp"
 #include "../inc/Handler.hpp"
 
-#define HOME_DIR "res/"
+Webserver::Webserver() {}
+Webserver::Webserver(Config config) : config(config) {}
+Webserver::~Webserver() {}
 
-Server::Server() {}
-Server::~Server() {}
-
-void Server::run()
+void Webserver::run()
 {
 	struct sockaddr_in addr_in;
 	addr_in.sin_family = AF_INET;
-	addr_in.sin_port = htons(PORT);
+	addr_in.sin_port = htons(config.getPort());
 	addr_in.sin_len = sizeof(addr_in);
-	addr_in.sin_addr.s_addr = inet_addr(LOCALHOST);
+	addr_in.sin_addr.s_addr = inet_addr(config.getHost().c_str());
 	bzero(&(addr_in.sin_zero), 8);
 	
 	listen_socket = socket(AF_INET, SOCK_STREAM, 0);
-	if (listen_socket == -1)
-	{
-		std::cerr << "socket" << std::endl;
-		exit(1);
-	}
-	
+	if (listen_socket < 0)
+		err("socket");
 	int on = 1;
-	setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+	if (setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
+		err("setcockopt");
 	if (bind(listen_socket, (struct sockaddr *) &addr_in, sizeof(struct sockaddr)) == -1)
 		err("bind");
-
 	if (listen(listen_socket, SOMAXCONN) == -1)
 		err("listen");
 
-	kq = kqueue();
-	EV_SET(&evSet, listen_socket, EVFILT_READ, EV_ADD, 0, 0, NULL);
-	if (kevent(kq, &evSet, 1, NULL, 0, NULL) == -1)
-		err("kevent");
+	memset(fds, 0, sizeof(fds));
+	fds[0].fd = listen_socket;
+	fds[0].events = POLLIN;
 
-	while (1)
+	end_server = false;
+	nfds = 1;
+	while (end_server == false)
+	{
 		listenLoop();
-	close(listen_socket);
+	}
+	for (int i = 0; i < nfds; i ++)
+	{
+		if (fds[i].fd >= 0)
+			close(fds[i].fd);
+	}
 }
 
-void Server::listenLoop()
+void Webserver::listenLoop()
 {
-	int nev = kevent(kq, NULL, 0, evList, 32, NULL);
-	if (nev < 1)
-		err("kevent");
-	for (int i = 0; i < nev; i++)
+	int timeout = (3 * 60 * 1000);
+	int new_sd = -1;
+	std::cout << "--- wainting on poll" << std::endl;
+	int rc = poll(fds, nfds, timeout);
+	if (rc < 0)
+		err("poll");
+	if (rc == 0)
+		err("poll timeout");
+	int current_size = nfds;
+	for (int i = 0; i < current_size; i++)
 	{
-		int fd = (int)evList[i].ident;
-		
-		if (evList[i].flags & EV_EOF)
+		if (fds[i].revents == 0)
+			continue;
+		if (fds[i].revents != POLLIN && fds[i].revents != POLLOUT)
 		{
-			std::cout << "Disconnect" << std::endl;
-			close(fd);
+			std::cout << "Error in revents" << std::endl;
+			end_server = true;
+			break;
 		}
-		else if (fd == listen_socket)
+		if (fds[i].fd == listen_socket)
 		{
-			struct sockaddr_storage addr;
-			socklen_t socklen = sizeof(addr);
-			int client_fd = accept(fd, (struct sockaddr *)&addr, &socklen);				
-			if (client_fd == -1)
-				err("accept");
-			EV_SET(&evSet, client_fd, EVFILT_READ, EV_ADD, 0, 0, NULL);
-			if (kevent(kq, &evSet, 1, NULL, 0, NULL) == -1)
-				err("kevent");
-			printf("---\nConnected\n");
-			EV_SET(&evSet, client_fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, NULL);
-			if (kevent(kq, &evSet, 1, NULL, 0, NULL) == -1)
-				err("kevent");
-		}
-		else if (evList[i].filter == EVFILT_READ || evList[i].filter == EVFILT_WRITE) 
-		{
-			Request request(readRequest(fd));
-			if (request.check())
+			printf("Listening socket is readable\n");
+			do
 			{
-				Handler handler(request);
-				Response response = handler.getResponse();
-				sendResponse(fd, i, response);
-			}
+				int new_sd = accept(listen_socket, NULL, NULL);
+				if (new_sd < 0)
+				{
+					if (errno != EWOULDBLOCK)
+					{
+						std::cerr << "accept error" << std::endl;
+						end_server = true;
+					}
+					break;
+				}
+				std::cout << "new incoming connection " << new_sd << std::endl;
+				fds[nfds].fd = new_sd;
+				fds[nfds].events = POLLIN;
+				nfds++;
+			} while (new_sd != -1);
+		}
+		else
+		{
+			printf("Descriptor %d is readable\n", fds[i].fd);
+			if (sendAndReceive(fds[i].fd, i) == -1)
+				closeConnection(i);
 		}
 	}
 }
 
-int Server::err(std::string msg) // добавить код возврата 500-какой-то в случае такой ошибки
+int Webserver::sendAndReceive(int fd, int i)
 {
-	std::cerr << "Error " << errno << " in " << msg << std::endl;
-	close(this->listen_socket);
-	exit(errno);
+	std::cout << "Send and receive, fd " << fd << std::endl;
+	if (connections.find(fd) == connections.end())
+	{
+		fds[i].events = POLLIN;
+		Request request(readRequest(fd), config);
+		Handler handler(request, config);
+		Response response = handler.getResponse();
+		Connection *connection = new Connection(request, response, fd); // удалять в дескрипторе
+		connections[fd] = connection;
+		fds[i].events = POLLOUT;
+		if (send(fd, response.toString().c_str(), response.toString().length(), 0) < 0)
+			return -1;
+		std::cout << "***\n" << response.toString() << "\n***\n" << std::endl;
+	}
+	fds[i].events = POLLOUT;
+	
+	if (connections[fd]->getResponse().getBodyFile() != "" && connections[fd]->isFinished() == false)
+	{
+		if (sendFile(*connections[fd]) < 0)
+			return -1;
+	}
+	std::string delimeter = "\r\n\r\n";
+	if (connections[fd]->isFinished())
+	{
+		if (send(fd, delimeter.c_str(), delimeter.length(), 0) < 0)
+			return -1;
+		closeConnection(i);
+		connections.erase(fd);
+	}
+	return 0;
 }
 
-
-std::string Server::readRequest(int socket)
+std::string Webserver::readRequest(int fd)
 {
-	char buf[BUFFER_SIZE];
-	size_t bytes_read = recv(socket, buf, sizeof(buf), 0);
-	printf("read %zu bytes\n", bytes_read);
+	char buf[config.getBufferSize()];
+	size_t bytes_read = recv(fd, buf, sizeof(buf), 0);
+	printf("read %zu bytes\n", bytes_read);	
 	if (bytes_read == 0)
 	{
 		std::cout << "Can't receive client's request" << std::endl;
@@ -107,53 +144,53 @@ std::string Server::readRequest(int socket)
 	return requestData;
 }
 
-int Server::sendFile(int fd, std::string file_path, int size)
+
+int Webserver::sendFile(Connection & connection)
 {
-	std::ifstream file(file_path.c_str());
-	if (!file)
-		return -1;	
-	int bufferSize = BUFFER_SIZE;
+	std::cout << "send file" << std::endl;
+	FILE* file = fopen(connection.getResponse().getBodyFile().c_str(), "rb");
+	fseek(file, connection.getPosition(), SEEK_SET);
+	
+	int bufferSize = config.getBufferSize();
 	char buffer[bufferSize];
-	int i = 0;
-	while (!file.eof())	
+	int bytes_read = fread(buffer, sizeof(char), bufferSize, file);
+	connection.setPosition(connection.getPosition() + bytes_read);
+	int l = send(connection.getFd(), buffer, bytes_read, 0);
+	if (l < 0)
 	{
-		file.read(buffer, bufferSize);
-		int l = send(fd, buffer, std::min(size - i, bufferSize), 0);
-		if (l < 0)
-			return -1;
-		i += l;
+		std::cout << "SEND ERROR" << std::endl;
+		return -1;
 	}
-	file.close();
-	std::cout << "file sent ok: " << i << " bytes" << std::endl; 
-	return i;
+	fclose(file);
+	std::cout << "file sent ok: " << bytes_read << " bytes, position " << connection.getPosition() 
+		<< " length " << connection.getResponse().getLength() << std::endl;
+
+	if (connection.getPosition() == connection.getResponse().getLength())
+		connection.setFinished(true);
+	else
+		connection.setFinished(false);
+	return 0;
 }
 
-void Server::sendResponse(int fd, int i, Response response)
+void Webserver::closeConnection(int i)
 {
-	off_t offset = (off_t)evList[i].udata;
-	off_t len = 0;
-	std::string delimeter = "\r\n\r\n";
-
-	int send_result = send(fd, response.toString().c_str(), response.toString().length(), 0);
-	// std::cout << "---\n" << response.toString() << "\n---\n";
-	if (send_result == -1)
-		err("send");
-	if (response.getBodyFile() != "")
+	close(fds[i].fd);
+	fds[i].fd = -1;
+	for (int i = 0; i < nfds; i++)
 	{
-		send_result = sendFile(fd, response.getBodyFile(), response.getLength());
-		if (send_result == -1)
-			err("send");
-	}
-	send_result = send(fd, delimeter.c_str(), delimeter.length(), 0);
-	if (send_result == -1)
-		err("send");
-	if (send_result)
-	{
-		if (errno == EAGAIN) 
+		if (fds[i].fd == -1)
 		{
-			EV_SET(&evSet, fd, EVFILT_WRITE, EV_ADD | EV_ONESHOT, 0, 0, (void *)(offset + len));
-			kevent(kq, &evSet, 1, NULL, 0, NULL);
+			for (int j = 0; j < nfds - 1; j++)
+				fds[i].fd = fds[j + 1].fd;
+			i--;
+			nfds--;
 		}
 	}
-	// printf("wrote %d bytes\n", send_result);
+}
+
+int Webserver::err(std::string msg) // добавить код возврата 500-какой-то в случае такой ошибки
+{
+	std::cerr << "Error " << errno << " in " << msg << std::endl;
+	close(this->listen_socket);
+	exit(errno);
 }

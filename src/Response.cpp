@@ -4,12 +4,8 @@
 Response::Response()
 {
 	initializeCodes();
-}
-
-Response::Response(std::string rawData)
-{
-	this->rawData = rawData;
-
+	initializeContentTypes();
+	this->sent = true;
 }
 
 Response::~Response() {}
@@ -23,9 +19,12 @@ Response::Response(Response const & other)
 	this->headers = other.headers;
 	this->bodyFile = other.bodyFile;
 	this->contentLength = other.contentLength;
+	this->sent = other.sent;
+	this->codes = other.codes;
+	this->contentTypes = other.contentTypes;
 }
 
-Response Response::operator=(Response const & other)
+Response & Response::operator=(Response const & other)
 {
 	this->httpVersion = other.httpVersion;
 	this->statusCode = other.statusCode;
@@ -33,6 +32,9 @@ Response Response::operator=(Response const & other)
 	this->headers = other.headers;
 	this->bodyFile = other.bodyFile;
 	this->contentLength = other.contentLength;
+	this->sent = other.sent;
+	this->codes = other.codes;
+	this->contentTypes = other.contentTypes;
 	return *this;
 }
 
@@ -57,6 +59,16 @@ std::string Response::getBodyFile()
 	return this->bodyFile;
 }
 
+std::string Response::getContentType(std::string ext)
+{
+	return this->contentTypes[ext];
+}
+
+bool Response::isSent()
+{
+	return this->sent;
+}
+
 void Response::setHttpVersion(std::string version)
 {
 	this->httpVersion = version;
@@ -77,27 +89,22 @@ void Response::setBody(std::string body)
 	this->bodyFile = body;
 }
 
+void Response::setSent(bool sent)
+{
+	this->sent = sent;
+}
+
 std::string Response::toString()
 {
 	std::stringstream resp;
 	std::string delimiter = "\r\n";
-
 	resp << httpVersion << " " << statusCode << " " << this->getStatusText() << delimiter
 	<< headers << delimiter
 	<< "Content-Length: " << this->getLength()
 	<< delimiter << delimiter;
 
 	return resp.str();
-
-	
-	// response << "HTTP/1.1 200 OK\r\n"
-	// << "Version: HTTP/1.1\r\n"
-	// << "Content-Type: text/html; charset=utf-8\r\n"
-	// << "Content-Length: " << response_body.str().length()
-	// << "\r\n\r\n"
-	// << response_body.str();
 }
-
 
 void Response::initializeCodes()
 {
@@ -154,4 +161,24 @@ void Response::initializeCodes()
 	codes[503] = "Service Unavailable";
 	codes[504] = "Gateway Timeout";
 	codes[505] = "HTTP Version Not Supported";
+}
+
+void Response::initializeContentTypes()
+{
+	contentTypes["gif"] = "image/gif";
+	contentTypes["jpg"] = "image/jpeg";
+	contentTypes["jpeg"] = "image/jpeg";
+	contentTypes["png"] = "image/png";
+	contentTypes["svg"] = "image/svg+xml";
+	contentTypes["webp"] = "image/webp";
+	contentTypes["ico"] = "image/vnd.microsoft.icon";
+
+	contentTypes["css"] = "text/css";
+	contentTypes["csv"] = "text/csv";
+	contentTypes["html"] = "text/html";
+	contentTypes["htm"] = "text/html";
+	// contentTypes["php"] = "text/php";
+	contentTypes["xml"] = "text/xml";
+	contentTypes["htm"] = "text/html";
+	contentTypes["pdf"] = "application/pdf";
 }

@@ -7,9 +7,15 @@
 		<h1>Page with form</h1>
 		<p>This is test main page with form</p>
 	
-		<form action="welcome.php" method="post">
-			First name: <input type="text" name="fname">
+		<form action="formpage.html" method="post">
+			First name: 
+			<input type="text" name="name">
 			<!-- First name: <input type="text" name="fname2"> -->
+			<input type="submit" value="Send Request">
+		</form>
+		<br><br>
+		<form action="formpage.html" method="post" enctype="multipart/form-data">
+			<input type="file" name="f">
 			<input type="submit" value="Send Request">
 		</form>
 	</body>

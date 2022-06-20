@@ -2,10 +2,11 @@
 
 Request::Request() {}
 
-Request::Request(std::string rawData) : rawData(rawData)
+Request::Request(std::string rawData, Config config) : rawData(rawData), config(config)
 {
 	if (this->rawData != "")
 		parseRequest(this->rawData);
+	// std::cout << "******" << rawData << "*****" << std::endl;
 }
 
 Request::Request(Request const & other)
@@ -16,16 +17,13 @@ Request::Request(Request const & other)
 	this->headers = other.headers;
 	this->body = other.body;
 	this->bodyPOST = other.bodyPOST;
+	this->body = other.body;
+	this->boundary = other.boundary;
 }
 
 Request Request::operator=(Request const & other)
 {
-	this->method = other.method;
-	this->url = other.url;
-	this->httpVersion = other.httpVersion;
-	this->headers = other.headers;
-	this->body = other.body;
-	this->bodyPOST = other.bodyPOST;
+	*this = Request(other);
 	return *this;
 }
 
@@ -65,13 +63,13 @@ void Request::parseRequest(std::string rawData)
 
 	start = end + 1;
 	end = line.find(' ', start);
-	std::string homeDir = HOME_DIR;
+	std::string homeDir = config.getHomeDir();
 	this->url = homeDir + line.substr(start + 1, end - start - 1);
 
 	start = end + 1;
 	end = line.length();
 	this->httpVersion = rawData.substr(start, end - start - 1);
-	std::cout << this->method << " - " << this->url << " - " << this->httpVersion << std::endl;
+	std::cout << this->method << " - " << this->url << std::endl;
 
 	start = end + 1;
 	end = rawData.find('\n', start);
@@ -86,39 +84,54 @@ void Request::parseRequest(std::string rawData)
 			std::string value = line.substr(delimiter + 2, line.length());
 			// std::cout << "- " << key << " - " << value << std::endl;
 			this->headers[key] = value;
-		}	
+		}
 		start = end + 1;
 		end = rawData.find('\n', start);
 	}
-	if(this->method == "POST")
+	if (this->method == "POST" && headers["Content-Type"] == "application/x-www-form-urlencoded")
+		parseUrlencoded(rawData, start);
+	else if (this->method == "POST" && headers["Content-Type"].substr(0, 19) == "multipart/form-data")
+		parseMultipart(rawData, start);
+}		
+
+void Request::parseUrlencoded(std::string rawData, int start)
+{
+	int end = rawData.length();
+	std::string line = rawData.substr(start, end - start);
+	start = 0;
+	std::string subLine;
+	while(line != "")
 	{
-		end = rawData.length();
-		line = rawData.substr(start, end - start);
-		start = 0;
-		std::string subLine;
-		while(line != "")
+		if(line.find('&', 0) != std::string::npos)
+			subLine = line.substr(start, line.find('&', 0));
+		else
+			subLine = line;
+		// std::cout << "sub line " << subLine << std::endl; //ex: key=val
+		int delimiter = subLine.find('=', 0);
+		std::string key = subLine.substr(0, delimiter);
+		std::string value = subLine.substr(delimiter + 1, line.length());
+		this->bodyPOST[key] = value;
+		// std::cout << "----- " << this->bodyPOST[key] << std::endl;
+		
+		if (line.find('&', 0) != std::string::npos)
 		{
-			if(line.find('&', 0) != std::string::npos)
-				subLine = line.substr(start, line.find('&', 0));
-			else
-				subLine = line;
-			// std::cout << "sub line " << subLine << std::endl; //ex: key=val
-			int delimiter = subLine.find('=', 0);
-			std::string key = subLine.substr(0, delimiter);
-			std::string value = subLine.substr(delimiter + 1, line.length());
-			this->bodyPOST[key] = value;
-			// std::cout << "----- " << this->bodyPOST[key] << std::endl;
-			
-			if (line.find('&', 0) != std::string::npos)
-			{
-				start = line.find('&', 0) + 1;
-				end = line.length();
-				line = line.substr(start, end - start);
-			}
-			else
-				line = "";
+			start = line.find('&', 0) + 1;
+			end = line.length();
+			line = line.substr(start, end - start);
 		}
+		else
+			line = "";
 	}
+}
+
+void Request::parseMultipart(std::string rawData, int start)
+{
+	int find = headers["Content-Type"].find("=", 0) + 1;
+	boundary = headers["Content-Type"].substr(find, headers["Content-Type"].length() - start);
+
+	std::cout << "BOUNDARY " << boundary << std::endl;
+	find = rawData.find(boundary, start);
+	std::cout << "FIND " << find << std::endl;
 }
 
 int Request::check()

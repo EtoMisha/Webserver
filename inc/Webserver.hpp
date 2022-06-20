@@ -6,41 +6,54 @@
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/poll.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <sys/event.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <map>
+#include <vector>
 
 #include "Request.hpp"
 #include "Response.hpp"
+#include "Config.hpp"
+#include "Connection.hpp"
 
-#define PORT 8000
-#define LOCALHOST "127.0.0.1"
-#define BUFFER_SIZE 1024
 #define NUSERS 10
 
-class Server
+class Webserver
 {
 	public:
-		Server();
-		~Server();
+		Webserver();
+		Webserver(Config config);
+		~Webserver();
 		
 		void run();
 
 	private:
+
+		Config config;
+
 		int listen_socket;
-		int kq;
-		struct kevent evSet;
-		struct kevent evList[32];
+		bool end_server;
+
+		struct pollfd fds[200];
+		int nfds;
+
+		std::map<int, Connection*> connections;
 
 		void listenLoop();
+		int sendAndReceive(int fd, int i);
+		void closeConnection(int i);
+		
 		std::string readRequest(int fd);
-		void sendResponse(int fd, int i, Response response);
+		int sendHeader(Connection & connection);
+		int sendBody(Connection & connection);
 
-		// int sendPage(int client_socket, std::string page);
-		int sendFile(int fd, std::string file_path, int size);
+		void sendResponse(Connection &connection);
+		int sendFile(Connection &connection);
 
 		int err(std::string msg);
 

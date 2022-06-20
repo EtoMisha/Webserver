@@ -8,21 +8,23 @@
 
 Handler::Handler() {}
 
-Handler::Handler(Request req) : request(req) 
+Handler::Handler(Request req, Config config) : request(req), config(config)
 {
 	// std::cout << "METHOD: " << request.getMethod() << std::endl;
-	
-	if (request.getMethod() == "GET")
-		methodGet();
-	else if (request.getMethod() == "POST")
-		methodPost();
-	else if (request.getMethod() == "DELETE")
-		methodDelete();
+	// if (request.check())
+	// {
+		if (request.getMethod() == "GET")
+			methodGet();
+		else if (request.getMethod() == "POST")
+			methodPost();
+		else if (request.getMethod() == "DELETE")
+			methodDelete();
+	// }
 }
 
 Handler::~Handler() {}
 
-Response Handler::getResponse() const
+Response Handler::getResponse()
 {
 	return this->response;
 }
@@ -57,8 +59,8 @@ void Handler::methodDelete()
 
 void Handler::returnFile()
 {
-	if (request.getUrl() == HOME_DIR)
-		request.setUrl(request.getUrl() + HOME_PAGE);
+	if (request.getUrl() == config.getHomeDir())
+		request.setUrl(request.getUrl() + config.getHomePage());
 	const char *file_path = request.getUrl().c_str();
 	FILE* file = fopen(file_path, "rb");
 	if (file == NULL)
@@ -82,5 +84,13 @@ void Handler::returnFile()
 		fclose(file);
 	}
 	response.setHttpVersion(request.getHttp());
-	response.setHeaders("Version: HTTP/1.1");//\r\nContent-Type: text/html; charset=utf-8");
+	response.setHeaders("Version: HTTP/1.1\r\nContent-Type: " + contentType());
+}
+
+std::string Handler::contentType()
+{
+	std::string file = response.getBodyFile();
+	int dot = file.find(".");
+	std::string extension = file.substr(dot + 1, file.length() - dot);
+	return response.getContentType(extension);
 }

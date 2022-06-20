@@ -7,15 +7,16 @@ class Response
 {
 	public:
 		Response();
-		Response(std::string rawData);
 		Response(Response const & other);
 		~Response();
 
-		Response operator=(Response const & other);
+		Response &operator=(Response const & other);
 
 		std::string getStatusText();
 		std::string getBodyFile();
 		int getLength();
+		std::string getContentType(std::string ext);
+		bool isSent();
 
 		void setStatusCode(int statusCode);
 		void setStatusText();
@@ -23,12 +24,12 @@ class Response
 		void setContentLength(int length);
 		void setHeaders(std::string headers);
 		void setBody(std::string body);
+		void setSent(bool sent);
 
-
+		int fd;
 		std::string toString();
 
 	private:
-		std::string rawData;
 		
 		std::string httpVersion;
 		int statusCode;
@@ -36,8 +37,14 @@ class Response
 		std::string headers;
 		std::string bodyFile;
 		int contentLength;
+
+		bool sent;
 	
 		std::map<int, std::string> codes;
+		std::map<std::string, std::string> contentTypes;
+
+		
 
 		void initializeCodes();
+		void initializeContentTypes();
 };
