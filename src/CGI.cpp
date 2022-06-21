@@ -11,7 +11,6 @@ void	CGI(std::string filename, int csock, char *envp[])
 		waitpid( cpid, NULL, 0 );
 	} else {
 		dup2( csock, STDOUT_FILENO );
-		dup2( csock, STDERR_FILENO );
 		close( csock );
 		execve( filename, NULL, envp );
 	}
