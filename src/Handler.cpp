@@ -8,7 +8,7 @@
 
 Handler::Handler() {}
 
-Handler::Handler(Request req, Config config) : request(req), config(config)
+Handler::Handler(Request req, ft::Server _server) : request(req), server(_server)
 {
 	// std::cout << "METHOD: " << request.getMethod() << std::endl;
 	// if (request.check())
@@ -59,8 +59,11 @@ void Handler::methodDelete()
 
 void Handler::returnFile()
 {
-	if (request.getUrl() == config.getHomeDir())
-		request.setUrl(request.getUrl() + config.getHomePage());
+	std::cout << request.getUrl() << std::endl;
+	// if (request.getUrl() == config.getHomeDir())
+	if (request.getUrl() == server.getRoot())
+		// request.setUrl(request.getUrl() + config.getHomePage());
+		request.setUrl(request.getUrl() + server.getIndex());
 	const char *file_path = request.getUrl().c_str();
 	FILE* file = fopen(file_path, "rb");
 	if (file == NULL)

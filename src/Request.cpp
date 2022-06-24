@@ -2,7 +2,7 @@
 
 Request::Request() {}
 
-Request::Request(std::string rawData, Config config) : rawData(rawData), config(config)
+Request::Request(std::string rawData, ft::Server _server) : rawData(rawData), server(_server)
 {
 	if (this->rawData != "")
 		parseRequest(this->rawData);
@@ -63,7 +63,10 @@ void Request::parseRequest(std::string rawData)
 
 	start = end + 1;
 	end = line.find(' ', start);
-	std::string homeDir = config.getHomeDir();
+	// std::string homeDir = config.getHomeDir();
+	std::string homeDir = server.getRoot();///
+	std::cout << "homeDir " << homeDir << std::endl;
+
 	this->url = homeDir + line.substr(start + 1, end - start - 1);
 
 	start = end + 1;

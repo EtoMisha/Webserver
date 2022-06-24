@@ -2,7 +2,8 @@
 #include <iostream>
 #include <map>
 
-#include "Config.hpp"
+// #include "Config.hpp"
+#include "Server.hpp"
 
 // #define HOME_DIR "res/"
 
@@ -10,7 +11,8 @@ class Request
 {
 	public:
 		Request();
-		Request(std::string rawData, Config config);
+		// Request(std::string rawData, Config config);
+		Request(std::string rawData, ft::Server _server);
 		Request(Request const & other);
 		~Request();
 
@@ -28,7 +30,8 @@ class Request
 		
 	private:
 		std::string rawData;
-		Config config;
+		// Config config;
+		ft::Server server;
 		
 		std::string method;
 		std::string url;

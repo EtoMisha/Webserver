@@ -20,6 +20,7 @@
 #include "Response.hpp"
 #include "Config.hpp"
 #include "Connection.hpp"
+#include "Server.hpp"
 
 #define NUSERS 10
 
@@ -27,14 +28,24 @@ class Webserver
 {
 	public:
 		Webserver();
-		Webserver(Config config);
+		// Webserver(Config config);
+		Webserver(std::vector<ft::Server> &_servers);
 		~Webserver();
 		
 		void run();
+		void prepare(int serv_id);
+
+		const std::vector<ft::Server> &getServers();
+
+		std::map<int, ft::Server> servs_fd;
 
 	private:
 
-		Config config;
+		int current_fd;
+
+		// Config config;
+		std::vector<ft::Server> servers;
+
 
 		int listen_socket;
 		bool end_server;
@@ -43,17 +54,18 @@ class Webserver
 		int nfds;
 
 		std::map<int, Connection*> connections;
+		std::vector<int> sockets;
 
 		void listenLoop();
 		int sendAndReceive(int fd, int i);
 		void closeConnection(int i);
 		
-		std::string readRequest(int fd);
+		std::string readRequest(int fd, int serv_id);
 		int sendHeader(Connection & connection);
 		int sendBody(Connection & connection);
 
 		void sendResponse(Connection &connection);
-		int sendFile(Connection &connection);
+		int sendFile(Connection &connection, int serv_id);
 
 		int err(std::string msg);
 

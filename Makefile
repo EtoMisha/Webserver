@@ -5,7 +5,7 @@ INC = $(wildcard ./inc/*.hpp)
 OBJ	= $(SRC:.cpp=.o)
 
 CC = c++
-FLAG = -Wall -Wextra -Werror -std=c++98
+FLAG = -Wall -Wextra -Werror -std=c++98 -g
 
 .PHONY: all bonus clean fclean re
 
