@@ -1,0 +1,30 @@
+<html>
+	<head>
+		<title>Tools page</title>
+	</head>
+	<body>
+		<h1>Наш супер мега тестовый сайт</h1>
+		<p><a href="../index.html">Главная страница</a></p>
+		<p><a href="../second.html">Вторая страница</a></p>
+		<p><a href="../formpage.html">Страница с формой отправки</a></p>
+		<p>Страница внутри директории tools</p>
+		<p><a href="../dir/dirpage.html">Страница внутри директории dir</a></p>
+		<p><a href="../redirect">Редирект</a></p>
+		<p><a href="../list">Листинг файлов</a></p>
+
+		<p>&nbsp;</p>
+		<h2>Вау, мы внутри директории tools</h2>
+		<p>Тут еще форма чтоб потестить POST запрос</p>
+		<form action="tools.html" method="post">
+			Введите имя: 
+			<input type="text" name="name">
+			И фамилию: <input type="text" name="surname">
+			<input type="submit" value="Send Request">
+		</form>
+		<br><br>
+		<form action="tools.html" method="post" enctype="multipart/form-data">
+			<input type="file" name="f">
+			<input type="submit" value="Send Request">
+		</form>
+	</body>
+</html>

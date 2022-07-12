@@ -1,18 +1,23 @@
 #pragma once
 #include <iostream>
 #include <map>
+#include <sys/stat.h>
 
-// #include "Config.hpp"
 #include "Server.hpp"
 
-// #define HOME_DIR "res/"
+#define BUFFER_SIZE 3000
+#define BOUNDARY "------WebKitFormBoundary"
+
+enum ReqType
+{
+	HEADERS, DATA_START, DATA_CONT, DATA_END
+};
 
 class Request
 {
 	public:
 		Request();
-		// Request(std::string rawData, Config config);
-		Request(std::string rawData, ft::Server _server);
+		Request(char *rawData, int size);
 		Request(Request const & other);
 		~Request();
 
@@ -21,16 +26,22 @@ class Request
 		std::string const getMethod() const;
 		std::string const getUrl() const;
 		std::string const getHttp() const;
+		std::string const getFilename() const;
+		char *getBody();
+		ReqType const getType() const;
+		int getSize() const;
 
+		std::map<std::string, std::string> &getHeaders();
 		std::map<std::string, std::string> &getBodyPOST();
 
 		void setUrl(std::string url);
+		void setFilename(std::string filename);
 
 		int check();
 		
 	private:
-		std::string rawData;
-		// Config config;
+		char *rawData;
+		int size;
 		ft::Server server;
 		
 		std::string method;
@@ -38,13 +49,11 @@ class Request
 		std::string httpVersion;
 		std::map<std::string, std::string> headers;
 		std::map<std::string, std::string> bodyPOST; // post method
-		std::string body;
-		// std::string contentType;
-		std::string boundary;
-		// int contentLength;
+		char body[BUFFER_SIZE];
+		std::string filename;
+		ReqType type;		
 		
-		
-		void parseRequest(std::string rawData);
+		void parseRequest(char *rawData);
 		void parseUrlencoded(std::string rawData, int start);
-		void parseMultipart(std::string rawData, int start);
+		void parseMultipart(char *rawData);
 };

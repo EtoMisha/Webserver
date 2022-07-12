@@ -14,8 +14,26 @@ ft::Server::Server() {
 	methods = std::vector<std::string>();
     locations = std::vector<ft::Location>();
 	errorPages = std::map<int, std::string>();
+	redirection = "";
+	redirection_code = 0;
 }
 ft::Server::~Server() {}
+
+// ft::Server::Server(Server & rhs)
+// {
+// 	this->host = rhs.host;
+// 	this->port = rhs.port;
+// 	this->server_name = rhs.server_name;
+// 	this->maxBodySize = rhs.maxBodySize;
+// 	this->autoindex = rhs.autoindex;
+// 	this->index = rhs.index;
+// 	this->root = rhs.root;
+// 	this->uploadPath = rhs.uploadPath;
+// 	this->methods = rhs.methods;
+// 	this->locations = rhs.locations;
+// 	this->errorPages = rhs.errorPages;
+// }
+
 
 ft::Server &ft::Server::operator=(const Server &rhs) {
 	this->host = rhs.host;
@@ -23,7 +41,14 @@ ft::Server &ft::Server::operator=(const Server &rhs) {
 	this->server_name = rhs.server_name;
 	this->maxBodySize = rhs.maxBodySize;
 	this->autoindex = rhs.autoindex;
-	errorPages = rhs.errorPages;
+	this->index = rhs.index;
+	this->root = rhs.root;
+	this->uploadPath = rhs.uploadPath;
+	this->methods = rhs.methods;
+	this->locations = rhs.locations;
+	this->errorPages = rhs.errorPages;
+	this->redirection = rhs.redirection;
+	this->redirection_code = rhs.redirection_code;
 	return *this;
 }
 
@@ -97,4 +122,17 @@ const std::map<int, std::string> &ft::Server::getErrorPages() {
 
 void ft::Server::setErrorPageVal(const int& code, const std::string& path){
 	errorPages[code] = path;
+}
+
+void ft::Server::setRedirection(const std::string &_redirection){
+	redirection = _redirection;
+}
+const std::string &ft::Server::getRedirection() const {
+	return redirection;
+}
+void ft::Server::setRedirectionCode(const int &_code){
+	redirection_code = _code;
+}
+const int &ft::Server::getRedirectionCode() const {
+	return redirection_code;
 }

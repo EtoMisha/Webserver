@@ -14,7 +14,9 @@ class Response
 
 		std::string getStatusText();
 		std::string getBodyFile();
+		std::string getHeaders();
 		int getLength();
+		int getStatus();
 		std::string getContentType(std::string ext);
 		bool isSent();
 
@@ -23,7 +25,7 @@ class Response
 		void setHttpVersion(std::string version);
 		void setContentLength(int length);
 		void setHeaders(std::string headers);
-		void setBody(std::string body);
+		void setBodyFile(std::string body);
 		void setSent(bool sent);
 
 		int fd;

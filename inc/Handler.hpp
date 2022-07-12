@@ -2,8 +2,13 @@
 
 #include "Request.hpp"
 #include "Response.hpp"
-// #include "Config.hpp"
 #include "Server.hpp"
+#include "Location.hpp"
+
+
+#include <fstream>
+#include <iostream>
+#include <dirent.h>
 
 // #define HOME_PAGE "index.html"
 // #define HOME_DIR "res/"
@@ -11,9 +16,9 @@
 class Handler
 {
 	public:
-		Handler();
+		// Handler();
 		// Handler(Request request, Config config);
-		Handler(Request request, ft::Server _server);
+		Handler(Request & request, ft::Server server);
 		~Handler();
 
 		Response getResponse();
@@ -22,14 +27,19 @@ class Handler
 		// Config config;
 		ft::Server server;
 
-		Request request;
+		Request & request;
 		Response response;
 
 		void methodGet();
 		void methodPost();
 		void methodDelete();
+		void saveFile();
 
 		void returnFile();
+		void checkLocation();
+		void returnErrorPage();
+		void listing();
+
 		std::string contentType();
 
 		// void readFile(unsigned char* buffer, size_t size, const char* file_path);

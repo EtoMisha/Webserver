@@ -278,8 +278,8 @@ void ft::Parser::fillLocationRedirection(std::string key, std::string line, ft::
 		throw std::invalid_argument("Parser error: location redirection error");
 	location.setRedirection(value[0]);
 	int code = checkPortVal(value[1]);
-	if (code != 302)//и что это за код
-		throw std::invalid_argument("Parser error: wrong number, you can use only code 302");
+	if (code < 300 || code > 308)//и что это за код
+		throw std::invalid_argument("Parser error: wrong number, you can use only codes from 300 to 308");
 	location.setRedirectionCode(code);
 }
 

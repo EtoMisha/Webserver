@@ -1,35 +1,55 @@
 #pragma once
-#include <iostream>
-#include <map>
+// #include <iostream>
+// #include <map>
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <string>
+#include <stdlib.h>
 
 #include "Request.hpp"
 #include "Response.hpp"
+#include "Server.hpp"
+
+
+enum ConStatus
+{
+	READ, READ_DONE, WRITE, WRITE_DONE, CLOSE
+};
 
 class Connection
 {
 	public:
 		Connection();
-		Connection(Request req, Response resp, int fd);
+		Connection(int fd, int listen_fd);
 		~Connection();
 		Connection(Connection const & other);
 		Connection & operator=(Connection const & other);
 		
-		int const getFd() const;
+		int getFd() const;
+		int getListenFd() const;
 		Request & getRequest();
 		Response & getResponse();
-		bool isFinished() const;
 		int getPosition() const;
-
-		void setResponse(Response response);
+		ConStatus getStatus();
+		ft::Server getServer();
+		
 		void setRequest(Request request);
-		void setFinished(bool finished);
+		void setResponse(Response response);
 		void setPosition(int counter);
+		void setStatus(ConStatus status);
+
+		int readRequest();
+		int sendHeaders();
+		int sendBody();
 		
 	private:
 		
 		int fd;
+		int listen_fd;
 		Request request;
 		Response response;
-		bool finished;
 		int position;
+		ConStatus status;
+		std::string filename;
 };
