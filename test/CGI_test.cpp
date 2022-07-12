@@ -86,23 +86,23 @@ int main()
 	//Отдаем тело запроса дочернему процессу
 	write(fdStdInPipe[1], strRequestBody.c_str(), strRequestBody.length());
 
-	while (1)
-	{
-		//Читаем ответ от дочернего процесса
-		// char bufferOut[100000];
-		// int n = read(fdStdOutPipe[0], bufferOut, 100000);
-		// if (n > 0)
-		// {
-		// 	//Выводим ответ на экран
-		// 	fwrite(bufferOut, 1, n, stdout);
-		// 	fflush(stdout);
-		// }
+	// while (1)
+	// {
+	// 	//Читаем ответ от дочернего процесса
+	// 	char bufferOut[100000];
+	// 	int n = read(fdStdOutPipe[0], bufferOut, 100000);
+	// 	if (n > 0)
+	// 	{
+	// 		//Выводим ответ на экран
+	// 		fwrite(bufferOut, 1, n, stdout);
+	// 		fflush(stdout);
+	// 	}
 
-		//Если дочерний процесс завершился, то завершаем и родительский процесс
-		int status;
-		if (waitpid(nChildProcessID, &status, WNOHANG) > 0)
-			break;
-	}
+	// 	//Если дочерний процесс завершился, то завершаем и родительский процесс
+	// 	int status;
+	// 	if (waitpid(nChildProcessID, &status, WNOHANG) > 0)
+	// 		break;
+	// }
 
 	return 0;
 }
