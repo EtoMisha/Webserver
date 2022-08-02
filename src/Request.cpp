@@ -93,7 +93,7 @@ void Request::setFilename(std::string filename)
 
 void Request::parseRequest(char *rawData)
 {
-						// std::cout << "*** Request ***\n" << rawData << "\n***\n";
+	// std::cout << "*** Request ***\n" << rawData << "\n***\n";
 	std::string rawLine = rawData;
 	std::string line = rawLine.substr(0, rawLine.find('\n', 0));
 

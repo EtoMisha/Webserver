@@ -27,21 +27,12 @@ static const char *pszChildProcessArgs[4] = {"./a.out", "first argument", "secon
 //Это функция, которая породит дочерний процесс и передаст ему переменные из родительского
 int spawn_process(const char *const *args, const char * const *pEnv)
 {
-    /* Create copy of current process */
     int pid = fork();
-    
-    /* The parent`s new pid will be 0 */
     if(pid == 0)
     {
-		/* We are now in a child progress 
-		Execute different process */
 		execve(args[0], (char* const*)args, (char* const*)pEnv);
-
-		/* This code will never be executed */
 		exit(EXIT_SUCCESS);
 	}
-
-    /* We are still in the original process */
     return pid;
 }
 
@@ -58,32 +49,22 @@ int main()
 		cout << "Cannot create CGI pipe";
 		return 0;
 	}
-
-	// Duplicate stdin and stdout file descriptors
 	int fdOldStdIn = dup(fileno(stdin));
 	int fdOldStdOut = dup(fileno(stdout));
 	fdStdOutPipe[1] = dup(fd);
-	
-	// Duplicate end of pipe to stdout and stdin file descriptors
 	if ((dup2(fdStdOutPipe[1], fileno(stdout)) == -1) || (dup2(fdStdInPipe[0], fileno(stdin)) == -1))
 		return 0;
-
-	// Close original end of pipe
 	close(fdStdInPipe[0]);
 	close(fdStdOutPipe[1]);
 
-	//Запускаем дочерний процесс, отдаем ему переменные командной строки и окружения
 	const int nChildProcessID = spawn_process(pszChildProcessArgs, pszChildProcessEnvVar);
 
-	// Duplicate copy of original stdin an stdout back into stdout
 	dup2(fdOldStdIn, fileno(stdin));
 	dup2(fdOldStdOut, fileno(stdout));
 
-	// Close duplicate copy of original stdin and stdout
 	close(fdOldStdIn);
 	close(fdOldStdOut);
 
-	//Отдаем тело запроса дочернему процессу
 	write(fdStdInPipe[1], strRequestBody.c_str(), strRequestBody.length());
 
 	// while (1)

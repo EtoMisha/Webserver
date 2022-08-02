@@ -19,14 +19,12 @@ Handler::Handler(Request & req, ft::Server server) : request(req), server(server
 		saveFile();
 	else {
 		checkLocation();
-
 		if (request.getMethod() == "GET")
 			methodGet();
 		else if (request.getMethod() == "POST")
 			methodPost();
 		else if (request.getMethod() == "DELETE")
 			methodDelete();
-
 		if (response.getStatus() > 400)
 			returnErrorPage();
 	}
@@ -158,7 +156,7 @@ void Handler::methodPost()
 			response.setStatusCode(413);
 			return ;
 		}
-
+		
 		std::ofstream file(request.getUrl() + ".txt");
 		std::map<std::string, std::string>::iterator it;
 		for (it = request.getBodyPOST().begin(); it != request.getBodyPOST().end(); it++)
@@ -168,9 +166,11 @@ void Handler::methodPost()
 					<< it->second 
 					<< std::endl;
 		}
+
 		this->returnFile();
 	}
 }
+
 
 void Handler::saveFile() // добавить exception
 {
