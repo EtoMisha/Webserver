@@ -11,22 +11,20 @@ static const string strRequestHeader = "Content-Length=" + to_string((long long)
 static const char *pszChildProcessEnvVar[4] = {strRequestHeader.c_str(), "VARIABLE2=2", "VARIABLE3=3", 0};
 
 //needed for execution, the script itself
-static const char *pszChildProcessArgs[4] = {"./a.out", "first argument", "second argument", 0};
+// static const char *pszChildProcessArgs[4] = {"./a.out", "first argument", "second argument", 0};
 CGI::CGI(Request request)
 {
-	_headers = request.getHeaders();
-	_bodies = request.getBodyPOST();
-	
+	// _headers = request.getHeaders();
+	// _bodies = request.getBodyPOST();
+	//_scriptPath = ; // parse to get it?
 }
 
-CGI::~CGI(){}	
-
-int CGI::spawnProcess(const char *const *args, const char * const *pEnv)
+int CGI::spawnProcess()
 {
     int pid = fork();
     if(pid == 0)
     {
-		execve(args[0], (char* const*)args, (char* const*)pEnv);
+		execve(_scriptPath, NULL, (char* const*)_argv);
 		exit(EXIT_SUCCESS);
 	}
     return pid;
@@ -53,7 +51,7 @@ void CGI::launchScript()
 	close(fdStdInPipe[0]);
 	close(fdStdOutPipe[1]);
 
-	const int nChildProcessID = spawnProcess(pszChildProcessArgs, pszChildProcessEnvVar);
+	const int nChildProcessID = spawnProcess();
 
 	dup2(fdOldStdIn, fileno(stdin));
 	dup2(fdOldStdOut, fileno(stdout));
