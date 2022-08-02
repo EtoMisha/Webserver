@@ -1,2 +1,10 @@
+.gitignore
 .DS_Store
 .vscode/
+default.conf
+CGI_test.cpp
+formpage*
+listing.html
+upload/
+test/
+res/welcome.php
