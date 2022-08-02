@@ -1,5 +1,5 @@
 
-#include "CGI.hpp"
+#include "../inc/CGI.hpp"
 
 using namespace std;
 
@@ -18,6 +18,8 @@ CGI::CGI(Request request)
 	_bodies = request.getBodyPOST();
 	
 }
+
+CGI::~CGI(){}	
 
 int CGI::spawnProcess(const char *const *args, const char * const *pEnv)
 {

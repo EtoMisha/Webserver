@@ -1,4 +1,5 @@
 #include "../inc/Handler.hpp"
+#include "../inc/CGI.hpp"
 
 #include <sstream>
 #include <iostream>
@@ -19,7 +20,9 @@ Handler::Handler(Request & req, ft::Server server) : request(req), server(server
 		saveFile();
 	else {
 		checkLocation();
-		if (request.getMethod() == "GET")
+		if (checkCGI())
+			runCGI();
+		else if (request.getMethod() == "GET")
 			methodGet();
 		else if (request.getMethod() == "POST")
 			methodPost();
@@ -28,6 +31,25 @@ Handler::Handler(Request & req, ft::Server server) : request(req), server(server
 		if (response.getStatus() > 400)
 			returnErrorPage();
 	}
+}
+
+bool Handler::checkCGI()
+{
+	std::string scriptName = server.getRoot() + "cgi-bin/" + request.getUrl();
+	FILE *file = fopen(scriptName.c_str(), "r");
+	if (request.getUrl() != "" && file != NULL)
+	{
+		std::cout << "script is present" << std::endl;
+		fclose(file);
+		return true;
+	}	
+	return false;
+}
+
+void Handler::runCGI()
+{
+	CGI cgi(request);
+	cgi.launchScript();
 }
 
 void Handler::checkLocation()

@@ -37,6 +37,10 @@ class Handler
 
 		void returnFile();
 		void checkLocation();
+
+		bool checkCGI();
+		void runCGI();
+
 		void returnErrorPage();
 		void listing();
 

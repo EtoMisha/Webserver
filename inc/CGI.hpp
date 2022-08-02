@@ -12,6 +12,7 @@
 #include <sys/wait.h>
 
 #include "Handler.hpp"
+
 class CGI{
 	public:
 		CGI();
