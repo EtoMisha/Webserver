@@ -14,9 +14,25 @@ static const char *pszChildProcessEnvVar[4] = {strRequestHeader.c_str(), "VARIAB
 // static const char *pszChildProcessArgs[4] = {"./a.out", "first argument", "second argument", 0};
 CGI::CGI(Request request)
 {
-	// _headers = request.getHeaders();
-	// _bodies = request.getBodyPOST();
 	//_scriptPath = ; // parse to get it?
+	std::map<std::string, std::string> body;
+	int argCount = body.size();
+
+	_argv = (char **)malloc(argCount + 1);
+	std::map<std::string, std::string>::iterator it_begin = body.begin();
+	std::map<std::string, std::string>::iterator it_end = body.end();
+	std::string temp;
+
+	while (it_begin != it_end)
+	{
+		temp = it_begin->first + it_begin->second;
+		*_argv = temp.c_str();
+		_argv++;
+		it_begin++;
+	}
+	*_argv = NULL;
+
+	
 }
 
 int CGI::spawnProcess()
@@ -24,7 +40,7 @@ int CGI::spawnProcess()
     int pid = fork();
     if(pid == 0)
     {
-		execve(_scriptPath, NULL, (char* const*)_argv);
+		execve("python", (char* const*)_script, (char* const*)_argv);
 		exit(EXIT_SUCCESS);
 	}
     return pid;
