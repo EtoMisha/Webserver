@@ -26,9 +26,7 @@ class CGI{
 	private:
 		// Request _request;
 		std::string _script;
-		const char *argv; //get args from url?
-		const char *args; //get script 
-		std::map<std::string, std::string> _headers;
-		std::map<std::string, std::string> _bodies;
-		int spawnProcess(const char *const *args, const char * const *pEnv);
+		const char *_argv; //get args from url?
+		const char *_scriptPath; //get script 
+		int spawnProcess();
 };
