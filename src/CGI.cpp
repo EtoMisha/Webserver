@@ -19,21 +19,38 @@ CGI::CGI(Request request)
 	//_scriptPath = ; // parse to get it?
 }
 
-int CGI::spawnProcess()
+CGI::~CGI() {}
+
+int CGI::spawnProcess(std::string filepath)
 {
-    int pid = fork();
+    std::cout << "START SPAWN PROCESS" << std::endl;
+	
+	char **args;
+	args = (char**) malloc(sizeof(char *) * 2);
+	args[0] = strdup(path + "/python");
+	args[1] = strdup(("/Users/fbeatris/Documents/Webserver/" + filepath).c_str());
+	std::cout << "ARGS " << args[0] << ", " << args[1] << std::endl;
+
+	int pid = fork();
+	
     if(pid == 0)
     {
-		execve(_scriptPath, NULL, (char* const*)_argv);
+		std::cout << "BEFORE EXECVE" << std::endl;
+		int res = execve(args[0], args, (char* const*)_argv);
+		std::cout << "EXECVE OK " << res << " " << strerror(errno) << std::endl;
 		exit(EXIT_SUCCESS);
+	}
+	else {
+		waitpid(pid, NULL, 0);
 	}
     return pid;
 }
 
-void CGI::launchScript()
+
+void CGI::launchScript(std::string filepath)
 {
-		
-	const int fd = open ("test.txt", ios::app);
+	const int fd = open("test.txt", O_RDWR);
+	std::cout << "LAUNCH SCRIPT, fd = " << fd << std::endl;
 
 	int fdStdInPipe[2], fdStdOutPipe[2];
 	
@@ -46,12 +63,17 @@ void CGI::launchScript()
 	int fdOldStdIn = dup(fileno(stdin));
 	int fdOldStdOut = dup(fileno(stdout));
 	fdStdOutPipe[1] = dup(fd);
+
 	if ((dup2(fdStdOutPipe[1], fileno(stdout)) == -1) || (dup2(fdStdInPipe[0], fileno(stdin)) == -1))
+	{
+		std::cout << "ERROR iN DUP 2" << std::endl;
 		return; //error
+	}
+		
 	close(fdStdInPipe[0]);
 	close(fdStdOutPipe[1]);
 
-	const int nChildProcessID = spawnProcess();
+	const int nChildProcessID = spawnProcess(filepath);
 
 	dup2(fdOldStdIn, fileno(stdin));
 	dup2(fdOldStdOut, fileno(stdout));

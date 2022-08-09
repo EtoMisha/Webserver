@@ -20,7 +20,7 @@ Handler::Handler(Request & req, ft::Server server) : request(req), server(server
 		saveFile();
 	else {
 		checkLocation();
-		if (checkCGI())
+		if (checkCGI()) 
 			runCGI();
 		else if (request.getMethod() == "GET")
 			methodGet();
@@ -39,17 +39,32 @@ bool Handler::checkCGI()
 	FILE *file = fopen(scriptName.c_str(), "r");
 	if (request.getUrl() != "" && file != NULL)
 	{
-		std::cout << "script is present" << std::endl;
+		std::cout << "script is found" << std::endl;
 		fclose(file);
 		return true;
 	}	
 	return false;
 }
 
-void Handler::runCGI()
+void Handler::runCGI() 
 {
+	std::string scriptName = server.getRoot() + "cgi-bin/" + request.getUrl();
 	CGI cgi(request);
-	cgi.launchScript();
+	cgi.launchScript(scriptName);
+
+	std::string tempFile = "test.txt";
+	FILE *file = fopen(tempFile.c_str(), "r");
+	if (file != NULL) {
+		fseek(file, 0L, SEEK_END);
+		int size = ftell(file);
+
+		response.setStatusCode(200);
+		response.setContentLength(size);
+		response.setBodyFile(tempFile);
+		response.setHeaders(response.getHeaders() + "\r\nContent-Type: " + contentType() + "; charset=utf-8");
+	} else
+		response.setStatusCode(404);
+	fclose(file);
 }
 
 void Handler::checkLocation()

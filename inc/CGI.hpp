@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <string.h>
 
 #include "Handler.hpp"
 
@@ -23,11 +24,11 @@ class CGI{
 		CGI operator=(CGI const & other);
 		
 
-		void launchScript();
+		void launchScript(std::string filepath);
 	private:
 		// Request _request;
 		std::string _script;
 		const char *_argv; //get args from url?
 		const char *_scriptPath; //get script 
-		int spawnProcess();
+		int spawnProcess(std::string filepath);
 };
