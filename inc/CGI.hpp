@@ -27,8 +27,9 @@ class CGI{
 		void launchScript(std::string filepath);
 	private:
 		// Request _request;
-		std::string _script;
-		const char *_argv; //get args from url?
+		const static std::map<std::string, std::string>_scriptType;
+		const char * _script;
+		const char **_argv; //get args from url?
 		const char *_scriptPath; //get script 
 		int spawnProcess(std::string filepath);
 };
