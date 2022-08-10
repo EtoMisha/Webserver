@@ -18,19 +18,19 @@ CGI::CGI(Request request)
 	std::map<std::string, std::string> body;
 	int argCount = body.size();
 
-	_argv = (char **)malloc(argCount + 1);
+	// _argv = (char **)malloc(argCount + 1);
 	std::map<std::string, std::string>::iterator it_begin = body.begin();
 	std::map<std::string, std::string>::iterator it_end = body.end();
 	std::string temp;
 
-	while (it_begin != it_end)
-	{
-		temp = it_begin->first + it_begin->second;
-		*_argv = temp.c_str();
-		_argv++;
-		it_begin++;
-	}
-	*_argv = NULL;
+	// while (it_begin != it_end)
+	// {
+	// 	temp = it_begin->first + it_begin->second;
+	// 	*_argv = temp.c_str();
+	// 	_argv++;
+	// 	it_begin++;
+	// }
+	// *_argv = NULL;
 
 	
 }
@@ -39,19 +39,27 @@ CGI::~CGI() {}
 
 int CGI::spawnProcess(std::string filepath)
 {
-    std::cout << "START SPAWN PROCESS" << std::endl;
-	
 	char **args;
-	args = (char**) malloc(sizeof(char *) * 2);
-	args[0] = strdup(path + "/python");
-	args[1] = strdup(("/Users/fbeatris/Documents/Webserver/" + filepath).c_str());
-	std::cout << "ARGS " << args[0] << ", " << args[1] << std::endl;
+
+	int dot = filepath.find(".");
+	std::string extension = filepath.substr(dot + 1, filepath.length() - dot);
+	if (extension == "py") {
+		args = (char**) malloc(sizeof(char *) * 5);
+		args[0] = strdup("/usr/local/bin/python3");
+		args[1] = strdup(("/Users/fbeatris/Documents/Webserver/" + filepath).c_str());
+		args[2] = NULL;
+	} else if (extension == "php") {
+		args = (char**) malloc(sizeof(char *) * 5);
+		args[0] = strdup("/usr/bin/php");
+		args[1] = strdup(("/Users/fbeatris/Documents/Webserver/" + filepath).c_str());
+		args[2] = NULL;
+	}
 
 	int pid = fork();
-	
     if(pid == 0)
     {
-		execve("python", (char* const*)_script, (char* const*)_argv);
+		int check = execve(args[0], args, NULL);
+		// std::cout << check << " " << strerror(errno) << std::endl;
 		exit(EXIT_SUCCESS);
 	}
 	else {
@@ -60,10 +68,9 @@ int CGI::spawnProcess(std::string filepath)
     return pid;
 }
 
-
 void CGI::launchScript(std::string filepath)
 {
-	const int fd = open("test.txt", O_RDWR);
+	const int fd = open("temp", O_RDWR | O_TRUNC);
 	std::cout << "LAUNCH SCRIPT, fd = " << fd << std::endl;
 
 	int fdStdInPipe[2], fdStdOutPipe[2];
@@ -94,6 +101,9 @@ void CGI::launchScript(std::string filepath)
 
 	close(fdOldStdIn);
 	close(fdOldStdOut);
+
+	
+	close(fd);
 
 	// write(fdStdInPipe[1], strRequestBody.c_str(), strRequestBody.length());
 

@@ -1,1 +1,1 @@
-print("Hello World!")
+print("<html><head></head><body><h2>Hello world from Python</h2></body></html>")

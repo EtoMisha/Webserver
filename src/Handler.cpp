@@ -48,11 +48,12 @@ bool Handler::checkCGI()
 
 void Handler::runCGI() 
 {
+	std::cout << "get root" << server.getRoot() << " url " << request.getUrl() << std::endl;
 	std::string scriptName = server.getRoot() + "cgi-bin/" + request.getUrl();
 	CGI cgi(request);
 	cgi.launchScript(scriptName);
 
-	std::string tempFile = "test.txt";
+	std::string tempFile = "temp";
 	FILE *file = fopen(tempFile.c_str(), "r");
 	if (file != NULL) {
 		fseek(file, 0L, SEEK_END);

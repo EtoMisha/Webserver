@@ -1,4 +1,0 @@
-START SPAWN PROCESS
-ARGS python, /Users/fbeatris/Documents/Webserver/res/cgi-bin/test.py
-BEFORE EXECVE
-EXECVE OK -1 No such file or directory
