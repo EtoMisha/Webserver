@@ -8,3 +8,4 @@ listing.html
 upload/
 test/
 res/welcome.php
+*.o
