@@ -49,7 +49,7 @@ bool Handler::checkCGI()
 char const ** Handler::getCGIargs()
 {
 	std::map<std::string, std::string>::iterator it;
-	char const **args = (char **)malloc(request.getBodyPOST().size() + 1);
+	char const **args = (char const **)malloc(request.getBodyPOST().size() + 1);
 
 	for (it = request.getBodyPOST().begin(); it != request.getBodyPOST().end(); it++)
 		*args = (it->first + "=" + it->second).c_str();
