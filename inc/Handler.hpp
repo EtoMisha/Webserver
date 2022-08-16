@@ -40,6 +40,7 @@ class Handler
 
 		bool checkCGI();
 		void runCGI();
+		char const ** getCGIargs();
 
 		void returnErrorPage();
 		void listing();

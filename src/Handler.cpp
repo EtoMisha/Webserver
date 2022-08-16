@@ -46,12 +46,28 @@ bool Handler::checkCGI()
 	return false;
 }
 
+char const ** Handler::getCGIargs()
+{
+	std::map<std::string, std::string>::iterator it;
+	char const **args = (char **)malloc(request.getBodyPOST().size() + 1);
+
+	for (it = request.getBodyPOST().begin(); it != request.getBodyPOST().end(); it++)
+		*args = (it->first + "=" + it->second).c_str();
+	return args;
+}
+
 void Handler::runCGI() 
 {
 	std::cout << "get root" << server.getRoot() << " url " << request.getUrl() << std::endl;
 	std::string scriptName = server.getRoot() + "cgi-bin/" + request.getUrl();
 	CGI cgi(request);
-	cgi.launchScript(scriptName);
+	char const ** args;
+	if (request.getMethod() == "POST")
+		args = this->getCGIargs();
+	else 
+		args = NULL;
+	
+	cgi.launchScript(scriptName, (char **)args);
 
 	std::string tempFile = "temp";
 	FILE *file = fopen(tempFile.c_str(), "r");
@@ -107,7 +123,7 @@ void Handler::checkLocation()
 }
 
 void Handler::returnErrorPage()
- {
+{
 	if (server.getErrorPages().find(response.getStatus()) != server.getErrorPages().end()){
 		std::string url = server.getRoot().substr(0, server.getRoot().length() - 1) 
 					+ server.getErrorPages().at(response.getStatus());

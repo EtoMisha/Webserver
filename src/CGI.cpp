@@ -37,7 +37,7 @@ CGI::CGI(Request request)
 
 CGI::~CGI() {}
 
-int CGI::spawnProcess(std::string filepath)
+int CGI::spawnProcess(std::string filepath, char **arg)
 {
 	char **args;
 
@@ -58,7 +58,7 @@ int CGI::spawnProcess(std::string filepath)
 	int pid = fork();
     if(pid == 0)
     {
-		int check = execve(args[0], args, NULL);
+		int check = execve(args[0], args, arg);
 		// std::cout << check << " " << strerror(errno) << std::endl;
 		exit(EXIT_SUCCESS);
 	}
@@ -68,7 +68,7 @@ int CGI::spawnProcess(std::string filepath)
     return pid;
 }
 
-void CGI::launchScript(std::string filepath)
+void CGI::launchScript(std::string filepath, char **args)
 {
 	const int fd = open("temp", O_RDWR | O_TRUNC);
 	std::cout << "LAUNCH SCRIPT, fd = " << fd << std::endl;
@@ -94,7 +94,7 @@ void CGI::launchScript(std::string filepath)
 	close(fdStdInPipe[0]);
 	close(fdStdOutPipe[1]);
 
-	const int nChildProcessID = spawnProcess(filepath);
+	const int nChildProcessID = spawnProcess(filepath, args);
 
 	dup2(fdOldStdIn, fileno(stdin));
 	dup2(fdOldStdOut, fileno(stdout));

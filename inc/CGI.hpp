@@ -24,12 +24,12 @@ class CGI{
 		CGI operator=(CGI const & other);
 		
 
-		void launchScript(std::string filepath);
+		void launchScript(std::string filepath, char **args);
 	private:
 		// Request _request;
 		const static std::map<std::string, std::string>_scriptType;
 		const char * _script;
 		const char **_argv; //get args from url?
 		const char *_scriptPath; //get script 
-		int spawnProcess(std::string filepath);
+		int spawnProcess(std::string filepath, char **args);
 };
