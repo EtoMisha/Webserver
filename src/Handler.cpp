@@ -46,13 +46,18 @@ bool Handler::checkCGI()
 	return false;
 }
 
-char const ** Handler::getCGIargs()
+char ** Handler::getCGIargs()
 {
 	std::map<std::string, std::string>::iterator it;
-	char const **args = (char const **)malloc(request.getBodyPOST().size() + 1);
+	char **args = (char **)malloc(request.getBodyPOST().size() + 1);
 
-	for (it = request.getBodyPOST().begin(); it != request.getBodyPOST().end(); it++)
-		*args = (it->first + "=" + it->second).c_str();
+	int i = 0;
+	for (it = request.getBodyPOST().begin(); it != request.getBodyPOST().end(); it++) {
+		args[i] = strdup((it->first + "=" + it->second).c_str());
+		i++;
+	}
+	args[i] = NULL;
+
 	return args;
 }
 
@@ -61,7 +66,7 @@ void Handler::runCGI()
 	std::cout << "get root" << server.getRoot() << " url " << request.getUrl() << std::endl;
 	std::string scriptName = server.getRoot() + "cgi-bin/" + request.getUrl();
 	CGI cgi(request);
-	char const ** args;
+	char ** args;
 	if (request.getMethod() == "POST")
 		args = this->getCGIargs();
 	else 

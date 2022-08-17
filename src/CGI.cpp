@@ -71,7 +71,7 @@ int CGI::spawnProcess(std::string filepath, char **arg)
 void CGI::launchScript(std::string filepath, char **args)
 {
 	const int fd = open("temp", O_RDWR | O_TRUNC);
-	std::cout << "LAUNCH SCRIPT, fd = " << fd << std::endl;
+	std::cout << "launch script, fd = " << fd << std::endl;
 
 	int fdStdInPipe[2], fdStdOutPipe[2];
 	
